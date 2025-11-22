@@ -1,0 +1,36 @@
+# Docker Hub Repository
+
+## Repository URL
+https://hub.docker.com/r/junpito/me-cfs-model
+
+## Build Instructions
+
+### Build Docker Image
+```bash
+docker build -t junpito/me-cfs-model:latest .
+```
+
+### Run Docker Container
+```bash
+docker run junpito/me-cfs-model:latest
+```
+
+### Push to Docker Hub
+```bash
+docker login
+docker push junpito/me-cfs-model:latest
+```
+
+## Using MLflow Build-Docker
+```bash
+# Build using MLflow (after training)
+mlflow models build-docker -m runs:/<run_id>/model -n junpito/me-cfs-model
+
+# Push to Docker Hub
+docker push junpito/me-cfs-model:latest
+```
+
+## Image Details
+- Base Image: python:3.12-slim
+- Model: RandomForestClassifier
+- Dataset: ME/CFS vs Depression Classification
