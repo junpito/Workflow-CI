@@ -1,0 +1,10 @@
+artifact_location: file:///E:/project/SMSML_JUNPITO-SALIM/Workflow-CI/MLProject/mlruns/511700617592852766/models/m-7b76f88f059d44dbb7b788ec78250f70/artifacts
+creation_timestamp: 1763824296781
+experiment_id: '511700617592852766'
+last_updated_timestamp: 1763824308909
+model_id: m-7b76f88f059d44dbb7b788ec78250f70
+model_type: null
+name: model
+source_run_id: a648fd18a6cf400296c53ec22a3db8db
+status: 2
+status_message: null

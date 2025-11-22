@@ -67,6 +67,13 @@ def train_model(n_estimators, max_depth, random_state):
         # Log custom metrics
         mlflow.log_metric("test_accuracy", accuracy)
         mlflow.log_metric("test_f1_weighted", f1)
+        
+        # Log model for Docker build
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            registered_model_name="ME_CFS_Depression_Model"
+        )
     
     print("\n" + "="*60)
     print("Training Completed")
