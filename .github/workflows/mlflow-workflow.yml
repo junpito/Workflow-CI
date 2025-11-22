@@ -1,0 +1,46 @@
+name: MLflow Training Workflow
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  train-model:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r MLProject/requirements.txt
+    
+    - name: Run MLflow Project
+      run: |
+        cd MLProject
+        python modelling.py --n_estimators 100 --max_depth 10 --random_state 42
+    
+    - name: Upload MLflow Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: mlflow-artifacts
+        path: MLProject/mlruns/
+        retention-days: 30
+    
+    - name: Upload Model Artifacts to Release (if tagged)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: MLProject/mlruns/**/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

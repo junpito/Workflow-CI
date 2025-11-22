@@ -1,0 +1,14 @@
+artifact_uri: file:///E:/project/SMSML_JUNPITO-SALIM/Workflow-CI/MLProject/mlruns/511700617592852766/7efb612b4a024db79b79086309e3bfa9/artifacts
+end_time: 1763819194281
+entry_point_name: ''
+experiment_id: '511700617592852766'
+lifecycle_stage: active
+run_id: 7efb612b4a024db79b79086309e3bfa9
+run_name: RandomForest_Workflow
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763819176338
+status: 3
+tags: []
+user_id: junpi

@@ -1,0 +1,11 @@
+PREPROCESSING INFORMATION
+==================================================
+
+Training samples: 800
+Testing samples: 200
+Number of features: 15
+
+Target mapping: {'Both': np.int64(0), 'Depression': np.int64(1), 'ME/CFS': np.int64(2)}
+
+Steps: Split -> Imputation -> Encoding -> Scaling
+Warning: No data leakage (fit only on training)

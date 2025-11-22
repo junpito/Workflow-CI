@@ -1,0 +1,24 @@
+PREPROCESSING SUMMARY
+==================================================
+Dataset shape: (1000, 17)
+Columns: ['age', 'sleep_quality_index', 'brain_fog_level', 'physical_pain_score', 'stress_level', 'depression_phq9_score', 'fatigue_severity_scale_score', 'pem_duration_hours', 'hours_of_sleep_per_night', 'pem_present', 'work_status', 'social_activity_level', 'exercise_frequency', 'meditation_or_mindfulness', 'diagnosis', 'gender_Female', 'gender_Male']
+Data types:
+age                             float64
+sleep_quality_index             float64
+brain_fog_level                 float64
+physical_pain_score             float64
+stress_level                    float64
+depression_phq9_score           float64
+fatigue_severity_scale_score    float64
+pem_duration_hours              float64
+hours_of_sleep_per_night        float64
+pem_present                       int64
+work_status                     float64
+social_activity_level           float64
+exercise_frequency              float64
+meditation_or_mindfulness       float64
+diagnosis                         int64
+gender_Female                   float64
+gender_Male                     float64
+dtype: object
+Missing values: 0
