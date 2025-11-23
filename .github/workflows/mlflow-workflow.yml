@@ -34,9 +34,11 @@ jobs:
         pip install -r MLProject/requirements.txt
     
     - name: Run mlflow project
+      env:
+        MLFLOW_CONDA_CREATE_ENV_CMD: pip
       run: |
         cd MLProject
-        mlflow run . -P n_estimators=100 -P max_depth=10 -P random_state=42
+        mlflow run . --env-manager=local -P n_estimators=100 -P max_depth=10 -P random_state=42
     
     - name: Get latest MLflow run_id
       id: get_run_id
