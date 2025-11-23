@@ -38,7 +38,7 @@ def train_model(n_estimators, max_depth, random_state):
     
     X_train, X_test, y_train, y_test = load_preprocessed_data()
     
-    mlflow.set_experiment("ME_CFS_Depression_Workflow")
+    # MLflow Project already creates experiment, just enable autolog
     mlflow.sklearn.autolog()
     
     with mlflow.start_run(run_name="RandomForest_Workflow"):
