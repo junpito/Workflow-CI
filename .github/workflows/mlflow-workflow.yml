@@ -80,7 +80,7 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/me-cfs-model:${{ github.sha }}
     
     - name: Upload MLflow Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mlflow-artifacts
         path: MLProject/mlruns/
