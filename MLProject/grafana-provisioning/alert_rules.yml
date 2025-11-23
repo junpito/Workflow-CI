@@ -1,0 +1,82 @@
+# Grafana Alerting Rules Configuration
+# ADVANCE Level - Kriteria 4: 3 Alert Rules Required
+
+# Alert Rule 1: High Prediction Latency
+# Triggers when average prediction latency exceeds 1 second for 2 minutes
+---
+alert: HighPredictionLatency
+expr: rate(model_prediction_latency_seconds_sum[2m]) / rate(model_prediction_latency_seconds_count[2m]) > 1
+for: 2m
+labels:
+  severity: warning
+  component: model-inference
+  project: mlops-dicoding
+annotations:
+  summary: "High prediction latency detected"
+  description: "Average prediction latency is {{ $value }}s (threshold: 1s). Model performance may be degraded."
+  dashboard: "http://localhost:3000/d/me-cfs-model-monitoring"
+
+# Alert Rule 2: Model Health Critical
+# Triggers when model health status is 0 (unhealthy)
+---
+alert: ModelHealthCritical
+expr: model_health_status == 0
+for: 1m
+labels:
+  severity: critical
+  component: model-service
+  project: mlops-dicoding
+annotations:
+  summary: "Model service is unhealthy"
+  description: "Model health check failed. Service may be down or model failed to load."
+  dashboard: "http://localhost:3000/d/me-cfs-model-monitoring"
+
+# Alert Rule 3: High Error Rate
+# Triggers when prediction error rate exceeds 5% in 5 minutes
+---
+alert: HighPredictionErrorRate
+expr: |
+  (
+    rate(model_prediction_errors_total[5m]) 
+    / 
+    (rate(model_prediction_requests_total[5m]) + rate(model_prediction_errors_total[5m]))
+  ) > 0.05
+for: 3m
+labels:
+  severity: warning
+  component: model-inference
+  project: mlops-dicoding
+annotations:
+  summary: "High prediction error rate detected"
+  description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%). Check model inputs and service logs."
+  dashboard: "http://localhost:3000/d/me-cfs-model-monitoring"
+
+# Additional Alert Rule 4: Low Throughput
+# Triggers when request throughput drops below 1 RPM for 5 minutes
+---
+alert: LowPredictionThroughput
+expr: model_prediction_throughput_rpm < 1
+for: 5m
+labels:
+  severity: info
+  component: model-service
+  project: mlops-dicoding
+annotations:
+  summary: "Low prediction throughput"
+  description: "Request throughput is {{ $value }} RPM. Service may not be receiving traffic."
+  dashboard: "http://localhost:3000/d/me-cfs-model-monitoring"
+
+# Additional Alert Rule 5: Memory Usage High
+# Triggers when model memory usage exceeds 1GB
+---
+alert: HighMemoryUsage
+expr: model_memory_usage_megabytes > 1024
+for: 3m
+labels:
+  severity: warning
+  component: model-service
+  project: mlops-dicoding
+annotations:
+  summary: "High model memory usage"
+  description: "Model memory usage is {{ $value }}MB (threshold: 1024MB). Memory leak possible."
+  dashboard: "http://localhost:3000/d/me-cfs-model-monitoring"

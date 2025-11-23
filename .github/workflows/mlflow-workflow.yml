@@ -13,25 +13,74 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up Python 3.12.7
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.12.7'
+    
+    - name: Check Env
+      run: |
+        python --version
+        pip --version
+        echo "Current directory: $(pwd)"
+        echo "Workspace: $GITHUB_WORKSPACE"
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install mlflow>=2.8.0
         pip install -r MLProject/requirements.txt
     
-    - name: Run MLflow Project
+    - name: Run mlflow project
       run: |
         cd MLProject
-        python modelling.py --n_estimators 100 --max_depth 10 --random_state 42
+        mlflow run . -P n_estimators=100 -P max_depth=10 -P random_state=42
+    
+    - name: Get latest MLflow run_id
+      id: get_run_id
+      run: |
+        cd MLProject
+        RUN_ID=$(python -c "import mlflow; client = mlflow.tracking.MlflowClient(); runs = client.search_runs(experiment_ids=['0'], order_by=['start_time DESC'], max_results=1); print(runs[0].info.run_id if runs else '')")
+        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+        echo "Latest Run ID: $RUN_ID"
+    
+    - name: Build Docker Model
+      run: |
+        cd MLProject
+        RUN_ID="${{ steps.get_run_id.outputs.run_id }}"
+        if [ ! -z "$RUN_ID" ]; then
+          mlflow models build-docker \
+            --model-uri "runs:/$RUN_ID/model" \
+            --name "me-cfs-model" \
+            --enable-mlserver
+          echo "Docker image built successfully"
+        else
+          echo "Warning: No run_id found, skipping Docker build"
+        fi
+    
+    - name: Log in to Docker Hub
+      if: success()
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Tag Docker Image
+      if: success()
+      run: |
+        docker tag me-cfs-model:latest ${{ secrets.DOCKER_USERNAME }}/me-cfs-model:latest
+        docker tag me-cfs-model:latest ${{ secrets.DOCKER_USERNAME }}/me-cfs-model:${{ github.sha }}
+    
+    - name: Push Docker Image
+      if: success()
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/me-cfs-model:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/me-cfs-model:${{ github.sha }}
     
     - name: Upload MLflow Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: mlflow-artifacts
         path: MLProject/mlruns/

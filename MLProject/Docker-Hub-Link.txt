@@ -1,70 +1,44 @@
-# Docker Hub Repository - ME/CFS Depression Model
+# Docker Hub - ME/CFS Depression Model
 
 ## Repository URL
 https://hub.docker.com/r/junpito/me-cfs-model
 
+**Image:** `junpito/me-cfs-model:latest`  
+**Status:** ✅ Successfully pushed  
+**Size:** ~500MB
+
 ---
 
-## MLflow Build-Docker Commands (ADVANCE Criteria)
+## Build & Push Commands
 
-### 1. Train Model dan Generate MLflow Artifact
 ```powershell
-py -3.12 modelling.py --n_estimators 100 --max_depth 10 --random_state 42
-```
+# Build image
+docker build -f Dockerfile.serving -t junpito/me-cfs-model:latest .
 
-**Run ID Generated:** `a648fd18a6cf400296c53ec22a3db8db`  
-**Model Registered:** ME_CFS_Depression_Model (version 1)
-
-### 2. Build Docker Image using MLflow
-```powershell
-py -3.12 -m mlflow models build-docker -m "runs:/a648fd18a6cf400296c53ec22a3db8db/model" -n "junpito/me-cfs-model:latest"
-```
-
-**Alternative dengan Registered Model:**
-```powershell
-py -3.12 -m mlflow models build-docker -m "models:/ME_CFS_Depression_Model/1" -n "junpito/me-cfs-model:latest"
-```
-
-### 3. Push to Docker Hub
-```powershell
-docker login
+# Push to Docker Hub
 docker push junpito/me-cfs-model:latest
 ```
 
 ---
 
-## Alternative: Manual Docker Build
+## Model Information
 
-### Build Docker Image
-```powershell
-docker build -t junpito/me-cfs-model:latest .
-```
-
-### Run Docker Container
-```powershell
-docker run -p 8080:8080 junpito/me-cfs-model:latest
-```
-
----
-
-## Image Details
-- **Base Image:** python:3.12-slim
 - **Model Type:** RandomForestClassifier
-- **MLflow Version:** 3.6.0
-- **Model Registry:** ME_CFS_Depression_Model
-- **Dataset:** ME/CFS vs Depression Classification (15 features, 3 classes)
+- **Dataset:** ME/CFS vs Depression (15 features, 3 classes)
 - **Accuracy:** 99.50%
+- **MLflow Version:** 3.6.0
+- **Python:** 3.12
 
 ---
 
-## Submission Notes for ADVANCE Criteria
-✅ **MLProject structure created** (MLproject, conda.yaml, requirements.txt, Dockerfile)  
-✅ **GitHub Actions workflow implemented** (.github/workflows/mlflow-workflow.yml)  
-✅ **MLflow training successfully executed** (Run ID: a648fd18a6cf400296c53ec22a3db8db)  
-✅ **Model logged with mlflow.sklearn.log_model()** (artifacts saved in mlruns/)  
-✅ **MLflow build-docker command executed:**
-   - Command: `py -3.12 -m mlflow models build-docker -m "models:/ME_CFS_Depression_Model/1" -n "junpito/me-cfs-model:latest"`
-   - MLflow automatically generates Dockerfile and builds container with model
-   - Demonstrates understanding of MLflow's Docker integration for model deployment
+## Usage
 
-**Note:** Build Docker image menggunakan `mlflow models build-docker` sudah dieksekusi. Command ini mengotomatisasi pembuatan Docker image dari MLflow model artifacts, yang merupakan requirement untuk mendapatkan poin ADVANCE (4/4) pada Kriteria 3.
+```powershell
+# Pull image
+docker pull junpito/me-cfs-model:latest
+
+# Run container
+docker run -p 5000:5000 junpito/me-cfs-model:latest
+```
+
+Model served at: `http://localhost:5000/invocations`

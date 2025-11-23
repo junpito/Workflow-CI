@@ -1,0 +1,50 @@
+# Prometheus Configuration for ME/CFS vs Depression Model Monitoring
+# ADVANCE Level - Kriteria 4
+
+global:
+  scrape_interval: 15s      # Scrape metrics every 15 seconds
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+  external_labels:
+    monitor: 'me-cfs-depression-model'
+    environment: 'production'
+    project: 'mlops-dicoding'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them
+# rule_files:
+#   - 'alert_rules.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Job 1: Scrape model metrics from Flask app
+  - job_name: 'ml_model_metrics'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['model:5000']
+        labels:
+          service: 'me-cfs-depression-model'
+          tier: 'application'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Job 2: Scrape Prometheus self-metrics
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          tier: 'monitoring'
+
+  # Job 3: Scrape Grafana metrics (optional)
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          tier: 'visualization'
+    scrape_interval: 30s

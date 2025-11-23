@@ -1,0 +1,15 @@
+# Grafana Dashboard Provisioning Configuration
+# Auto-load dashboards from JSON files
+
+apiVersion: 1
+
+providers:
+  - name: 'ML Model Monitoring'
+    orgId: 1
+    folder: 'MLOps'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

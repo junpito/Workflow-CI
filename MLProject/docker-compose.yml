@@ -1,0 +1,110 @@
+# Docker Compose for ME/CFS vs Depression Model Monitoring Stack
+# ADVANCE Level - Kriteria 4: Monitoring & Logging
+# Services: Model (Flask + MLflow) + Prometheus + Grafana
+
+services:
+  # ============================================================================
+  # MODEL SERVICE - Flask app with Prometheus metrics
+  # ============================================================================
+  model:
+    image: python:3.12-slim
+    container_name: me-cfs-model-service
+    ports:
+      - "5000:5000"
+    environment:
+      - MODEL_PATH=/opt/ml/model
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./model_deploy:/opt/ml/model
+      - ./prometheus_exporter_lite.py:/app/prometheus_exporter.py
+      - ./requirements_lite.txt:/app/requirements.txt
+    working_dir: /app
+    command: >
+      sh -c "pip install --no-cache-dir --default-timeout=100 -r requirements.txt &&
+             python prometheus_exporter.py"
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "service=ml-model"
+      - "tier=application"
+      - "project=mlops-dicoding"
+
+  # ============================================================================
+  # PROMETHEUS SERVICE - Metrics collection and storage
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus-server
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+    depends_on:
+      - model
+    labels:
+      - "service=prometheus"
+      - "tier=monitoring"
+
+  # ============================================================================
+  # GRAFANA SERVICE - Visualization and alerting
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: grafana-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=Dicoding
+      - GF_SECURITY_ADMIN_PASSWORD=Dicoding123!
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana-provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    labels:
+      - "service=grafana"
+      - "tier=visualization"
+
+# ============================================================================
+# VOLUMES - Persistent data storage
+# ============================================================================
+volumes:
+  prometheus-data:
+    driver: local
+    name: prometheus-storage
+  grafana-data:
+    driver: local
+    name: grafana-storage
+
+# ============================================================================
+# NETWORKS - Isolated network for services
+# ============================================================================
+networks:
+  monitoring-network:
+    driver: bridge
+    name: mlops-monitoring-net
